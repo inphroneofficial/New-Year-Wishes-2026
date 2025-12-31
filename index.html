@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Charset -->
     <meta charset="UTF-8" />
+
+    <!-- Viewport (smooth mobile scrolling) -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
@@ -25,7 +28,7 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://newyear2026.app" />
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://newyear2026.app" />
     <meta property="og:title" content="New Year 2026 Wishes" />
@@ -48,19 +51,34 @@
     <meta name="twitter:image" content="/og-image.png" />
     <meta name="twitter:creator" content="@g_thangella" />
 
-    <!-- Preconnect -->
+    <!-- Preconnect for Fonts (safe even if not used yet) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Favicon / Web Icons -->
+    <!-- Favicons -->
     <link rel="icon" type="image/png" href="/web icon 1.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/web icon 1.png" />
 
-    <!-- PWA -->
+    <!-- PWA / Mobile -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="NY 2026" />
+
+    <!-- Performance Hint: reduce animation jank -->
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background-color: #0a0a0a;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+    </style>
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -87,6 +105,8 @@
 
   <body>
     <div id="root"></div>
+
+    <!-- Vite entry (non-blocking by default) -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
