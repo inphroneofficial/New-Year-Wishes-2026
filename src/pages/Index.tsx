@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import WelcomeStage from "@/components/newyear/WelcomeStage";
@@ -22,7 +22,7 @@ import PremiumBackground from "@/components/newyear/PremiumBackground";
 import CinematicTransition from "@/components/newyear/CinematicTransition";
 import AmbientLighting from "@/components/newyear/AmbientLighting";
 import PerformanceToggle from "@/components/newyear/PerformanceToggle";
-import ThemeSelector, { ThemeVariant } from "@/components/newyear/ThemeSelector";
+import { ThemeVariant } from "@/components/newyear/ThemeSelector";
 import NewYearGallery from "@/components/newyear/NewYearGallery";
 import MobileControlsMenu from "@/components/newyear/MobileControlsMenu";
 import RewindItSection from "@/components/newyear/RewindItSection";
@@ -41,9 +41,6 @@ type Stage =
   | "reveal"
   | "celebration";
 
-/* ----------------------------- */
-/* 🚀 LIGHTWEIGHT ANIMATIONS */
-/* ----------------------------- */
 const stageVariants = {
   initial: { opacity: 0, y: 30 },
   animate: {
@@ -67,6 +64,7 @@ const Index = () => {
   const [showFireworks, setShowFireworks] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
 
+  // ✅ Music ON by default
   const [isMuted, setIsMuted] = useState(false);
   const [isLiteMode, setIsLiteMode] = useState(false);
 
@@ -88,6 +86,23 @@ const Index = () => {
     [isLiteMode, showCinematicTransition]
   );
 
+  // 🔑 Start music on first user interaction (mobile-safe)
+  useEffect(() => {
+    const unlockAudio = () => {
+      startAmbientMusic();
+      window.removeEventListener("touchstart", unlockAudio);
+      window.removeEventListener("click", unlockAudio);
+    };
+
+    window.addEventListener("touchstart", unlockAudio, { once: true });
+    window.addEventListener("click", unlockAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("touchstart", unlockAudio);
+      window.removeEventListener("click", unlockAudio);
+    };
+  }, [startAmbientMusic]);
+
   const transitionToStage = useCallback(
     (stage: Stage) => {
       if (!isLiteMode) {
@@ -103,9 +118,7 @@ const Index = () => {
     [isLiteMode, playStinger]
   );
 
-  /* ----------------------------- */
-  /* 🎯 HANDLERS */
-  /* ----------------------------- */
+  /* ---------------- HANDLERS ---------------- */
 
   const handleStartJourney = useCallback(() => {
     startAmbientMusic();
@@ -162,7 +175,6 @@ const Index = () => {
     <div className="relative min-h-screen overflow-hidden">
       {!isLiteMode && <PremiumBackground variant="aurora" intensity="low" />}
       {effectsEnabled && <AmbientLighting stage={currentStage as any} />}
-
       {effectsEnabled && <GlowingOrbs count={6} />}
       {effectsEnabled && <ShootingStars active frequency={5000} />}
 
@@ -180,7 +192,10 @@ const Index = () => {
       />
 
       <motion.div className="hidden md:flex fixed top-4 right-4 z-50 gap-2">
-        <PerformanceToggle isLiteMode={isLiteMode} onToggle={() => setIsLiteMode((m) => !m)} />
+        <PerformanceToggle
+          isLiteMode={isLiteMode}
+          onToggle={() => setIsLiteMode((m) => !m)}
+        />
         <ThemeToggle />
         <SoundToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />
       </motion.div>
@@ -223,7 +238,11 @@ const Index = () => {
 
         {currentStage === "reveal" && (
           <motion.div key="reveal" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <RevealStage userName={userName} reflections={reflections} onContinue={() => transitionToStage("celebration")} />
+            <RevealStage
+              userName={userName}
+              reflections={reflections}
+              onContinue={() => transitionToStage("celebration")}
+            />
           </motion.div>
         )}
 
