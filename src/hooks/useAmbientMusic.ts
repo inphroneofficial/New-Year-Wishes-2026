@@ -3,29 +3,36 @@ import { useCallback, useEffect, useRef } from "react";
 export function useAmbientMusic(isMuted: boolean) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const start = useCallback(() => {
+  const initAudio = useCallback(() => {
     if (audioRef.current) return;
 
     const audio = new Audio("/MUSIC-5.mp3");
     audio.loop = true;
-    audio.volume = isMuted ? 0 : 0.4;
-    audio.muted = false;
-    audio.playsInline = true; // iOS fix
-
-    audio.play().catch(() => {
-      // Mobile blocks until user gesture
-    });
+    audio.volume = 0.4;
+    audio.playsInline = true; // 🔥 REQUIRED FOR MOBILE
 
     audioRef.current = audio;
-  }, [isMuted]);
+  }, []);
 
-  // Update volume when mute changes
+  // 🔊 PLAY / PAUSE BASED ON MUTE
   useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = isMuted ? 0 : 0.4;
-  }, [isMuted]);
+    initAudio();
 
-  // Cleanup
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isMuted) {
+      audio.pause();
+    } else {
+      audio
+        .play()
+        .catch(() => {
+          // autoplay blocked — user interaction required
+        });
+    }
+  }, [isMuted, initAudio]);
+
+  // 🧹 CLEANUP
   useEffect(() => {
     return () => {
       audioRef.current?.pause();
@@ -33,5 +40,5 @@ export function useAmbientMusic(isMuted: boolean) {
     };
   }, []);
 
-  return { start };
+  return null;
 }
