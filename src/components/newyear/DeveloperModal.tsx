@@ -98,40 +98,44 @@ export default function DeveloperModal({
 
           <Separator className="my-4" />
 
-          {/* Avatar Section */}
-          <motion.div
-            className="flex flex-col items-center text-center space-y-4"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <motion.div
-              className="relative"
-              whileHover={{ rotateX: 6, rotateY: -6, scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 120 }}
-              style={{ perspective: 2000 }}
-            >
-              <div className="rounded-2xl p-[2px] bg-gradient-to-br from-magical-gold to-luxury-aurora-2 shadow-xl">
-                <Avatar className="w-28 h-28 rounded-2xl bg-card shadow-inner">
-                  <AvatarImage src="/GTK.png" alt="G. Thangella" />
-                  <AvatarFallback className="rounded-2xl text-2xl font-display bg-gradient-to-br from-magical-gold/20 to-luxury-aurora-2/20">
-                    GT
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+         {/* Avatar Section */}
+<motion.div
+  className="flex flex-col items-center text-center space-y-4"
+  initial={{ opacity: 0, scale: 0.96 }}
+  animate={{ opacity: 1, scale: 1 }}
+>
+  <motion.div
+    className="relative"
+    whileHover={{ rotateX: 6, rotateY: -6, scale: 1.05 }}
+    transition={{ type: "spring", stiffness: 120 }}
+    style={{ perspective: 2000 }}
+  >
+    <div className="rounded-2xl p-[2px] bg-gradient-to-br from-magical-gold to-luxury-aurora-2 shadow-xl">
+      <Avatar className="w-28 h-28 rounded-2xl bg-card shadow-inner overflow-hidden">
+        <AvatarImage
+          src="/GTK.png"
+          alt="G. Thangella"
+          className="w-full h-full object-cover object-center rounded-2xl"
+        />
+        <AvatarFallback className="rounded-2xl text-2xl font-display bg-gradient-to-br from-magical-gold/20 to-luxury-aurora-2/20">
+          GT
+        </AvatarFallback>
+      </Avatar>
+    </div>
 
-              <motion.div
-                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-magical-gold flex items-center justify-center shadow-lg"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Star className="w-3.5 h-3.5 text-background" fill="currentColor" />
-              </motion.div>
-            </motion.div>
+    {/* Star badge */}
+    <motion.div
+      className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-magical-gold flex items-center justify-center shadow-lg"
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ duration: 2, repeat: Infinity }}
+    >
+      <Star className="w-3.5 h-3.5 text-background" fill="currentColor" />
+    </motion.div>
+  </motion.div>
 
-            <h3 className="text-xl font-display font-semibold">
-              G. Thangella
-            </h3>
-
+  <h3 className="text-xl font-display font-semibold">
+    G. Thangella
+  </h3>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               A thoughtful design and gentle technology can turn moments into
               meaningful memories.
