@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense, memo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import WelcomeStage from "@/components/newyear/WelcomeStage";
@@ -7,30 +7,23 @@ import ReflectionStage, { ReflectionData } from "@/components/newyear/Reflection
 import GiftStage from "@/components/newyear/GiftStage";
 import RevealStage from "@/components/newyear/RevealStage";
 import CelebrationStage from "@/components/newyear/CelebrationStage";
-
-import ConfettiExplosion from "@/components/newyear/ConfettiExplosion";
-import LightBurst from "@/components/newyear/LightBurst";
-import FireworksEffect from "@/components/newyear/FireworksEffect";
-import ShootingStars from "@/components/newyear/ShootingStars";
-import GlowingOrbs from "@/components/newyear/GlowingOrbs";
+import LoadingScreen from "@/components/newyear/LoadingScreen";
+import DeveloperModal from "@/components/newyear/DeveloperModal";
 
 import SoundToggle from "@/components/newyear/SoundToggle";
 import ThemeToggle from "@/components/newyear/ThemeToggle";
-import LoadingScreen from "@/components/newyear/LoadingScreen";
-import DeveloperModal from "@/components/newyear/DeveloperModal";
-import PremiumBackground from "@/components/newyear/PremiumBackground";
-import CinematicTransition from "@/components/newyear/CinematicTransition";
-import AmbientLighting from "@/components/newyear/AmbientLighting";
 import PerformanceToggle from "@/components/newyear/PerformanceToggle";
-import ThemeSelector, { ThemeVariant } from "@/components/newyear/ThemeSelector";
-import NewYearGallery from "@/components/newyear/NewYearGallery";
-import MobileControlsMenu from "@/components/newyear/MobileControlsMenu";
-import RewindItSection from "@/components/newyear/RewindItSection";
 
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { useMusicStingers } from "@/hooks/useMusicStingers";
+
+/* 🔥 LAZY LOAD HEAVY EFFECTS */
+const PremiumBackground = lazy(() => import("@/components/newyear/PremiumBackground"));
+const AmbientLighting = lazy(() => import("@/components/newyear/AmbientLighting"));
+const ConfettiExplosion = lazy(() => import("@/components/newyear/ConfettiExplosion"));
+const FireworksEffect = lazy(() => import("@/components/newyear/FireworksEffect"));
 
 type Stage =
   | "loading"
@@ -41,72 +34,71 @@ type Stage =
   | "reveal"
   | "celebration";
 
-/* 🔥 Lightweight animation (NO blur) */
+/* ✅ PERFORMANCE-SAFE TRANSITIONS (NO BLUR) */
 const stageVariants = {
-  initial: { opacity: 0, y: 30 },
+  initial: {
+    opacity: 0,
+    scale: 0.97,
+    y: 20,
+  },
   animate: {
     opacity: 1,
+    scale: 1,
     y: 0,
-    transition: { duration: 0.45, ease: "easeOut" },
+    transition: {
+      duration: 0.45,
+      ease: "easeOut",
+    },
   },
   exit: {
     opacity: 0,
+    scale: 1.02,
     y: -20,
-    transition: { duration: 0.3 },
+    transition: {
+      duration: 0.3,
+      ease: "easeIn",
+    },
   },
 };
 
-const Index = () => {
+export default function Index() {
   const [currentStage, setCurrentStage] = useState<Stage>("loading");
   const [userName, setUserName] = useState("Friend");
   const [reflections, setReflections] = useState<ReflectionData | null>(null);
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
-  const [showBurst, setShowBurst] = useState(false);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isLiteMode, setIsLiteMode] = useState(false);
-
-  const [showDeveloperModal, setShowDeveloperModal] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
-  const [showRewindIt, setShowRewindIt] = useState(false);
-
-  const [giftKey, setGiftKey] = useState(0);
-  const [currentTheme, setCurrentTheme] = useState<ThemeVariant>("midnight");
-  const [showCinematicTransition, setShowCinematicTransition] = useState(false);
-
-  /* 🔥 NEW: delay heavy effects */
   const [effectsReady, setEffectsReady] = useState(false);
 
-  useEffect(() => {
-    requestAnimationFrame(() => setEffectsReady(true));
-  }, []);
+  const [showDeveloperModal, setShowDeveloperModal] = useState(false);
 
   const { playSound } = useSoundEffects(isMuted);
   const { triggerHaptic } = useHapticFeedback();
   const { start: startAmbientMusic } = useAmbientMusic(isMuted);
   const { playStinger } = useMusicStingers(isMuted);
 
-  const effectsEnabled = useMemo(
-    () => effectsReady && !isLiteMode && !showCinematicTransition,
-    [effectsReady, isLiteMode, showCinematicTransition]
-  );
+  /* 🔥 AUTO LITE MODE FOR MOBILE */
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsLiteMode(true);
+    }
+  }, []);
 
-  const transitionToStage = useCallback(
-    (stage: Stage) => {
-      if (!isLiteMode) {
-        setShowCinematicTransition(true);
-        playStinger("transition");
-      }
+  /* 🔥 DELAY EFFECTS AFTER UI */
+  useEffect(() => {
+    const id = setTimeout(() => setEffectsReady(true), 300);
+    return () => clearTimeout(id);
+  }, [currentStage]);
 
-      setTimeout(() => {
-        setCurrentStage(stage);
-        setShowCinematicTransition(false);
-      }, isLiteMode ? 50 : 200);
-    },
-    [isLiteMode, playStinger]
-  );
+  const transitionToStage = useCallback((stage: Stage) => {
+    setEffectsReady(false);
+    setCurrentStage(stage);
+  }, []);
+
+  /* -------- STAGE HANDLERS -------- */
 
   if (currentStage === "loading") {
     return <LoadingScreen onComplete={() => transitionToStage("welcome")} />;
@@ -114,100 +106,123 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {effectsEnabled && <PremiumBackground variant="aurora" intensity="low" />}
-      {effectsEnabled && <AmbientLighting stage={currentStage as any} />}
-      {effectsEnabled && <GlowingOrbs count={6} />}
-      {effectsEnabled && <ShootingStars active frequency={5000} />}
+      {/* 🔥 BACKGROUND EFFECTS (GATED) */}
+      <Suspense fallback={null}>
+        {effectsReady && !isLiteMode && (
+          <PremiumBackground variant="aurora" intensity="low" />
+        )}
 
-      <CinematicTransition active={showCinematicTransition} />
+        {effectsReady && !isLiteMode && (
+          <AmbientLighting stage={currentStage === "loading" ? "welcome" : currentStage} />
+        )}
+      </Suspense>
 
-      <MobileControlsMenu
-        isMuted={isMuted}
-        onToggleMute={() => setIsMuted((m) => !m)}
-        currentTheme={currentTheme}
-        onThemeChange={setCurrentTheme}
-        isLiteMode={isLiteMode}
-        onToggleLiteMode={() => setIsLiteMode((m) => !m)}
-        onOpenGallery={() => setShowGallery(true)}
-        onOpenRewindIt={() => setShowRewindIt(true)}
-      />
-
-      <motion.div className="hidden md:flex fixed top-4 right-4 z-50 gap-2">
-        <PerformanceToggle isLiteMode={isLiteMode} onToggle={() => setIsLiteMode((m) => !m)} />
+      {/* 🔥 TOP CONTROLS */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <PerformanceToggle
+          isLiteMode={isLiteMode}
+          onToggle={() => setIsLiteMode((p) => !p)}
+        />
         <ThemeToggle />
-        <SoundToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />
-      </motion.div>
+        <SoundToggle
+          isMuted={isMuted}
+          onToggle={() => setIsMuted((p) => !p)}
+        />
+      </div>
 
-      <NewYearGallery open={showGallery} onOpenChange={setShowGallery} />
-      <RewindItSection open={showRewindIt} onOpenChange={setShowRewindIt} />
-
-      <LightBurst active={showBurst && effectsEnabled} />
-      <ConfettiExplosion active={showConfetti} count={isLiteMode ? 40 : 120} />
-      {effectsEnabled && <FireworksEffect active={showFireworks} />}
-
-      <AnimatePresence initial={false}>
+      {/* 🔥 STAGES */}
+      <AnimatePresence mode="wait">
         {currentStage === "welcome" && (
-          <motion.div key="welcome" variants={stageVariants} initial="initial" animate="animate" exit="exit">
+          <motion.div key="welcome" {...stageVariants}>
             <WelcomeStage
-              onStart={() => transitionToStage("name")}
+              onStart={() => {
+                startAmbientMusic();
+                playSound("click");
+                transitionToStage("name");
+              }}
               onDeveloperClick={() => setShowDeveloperModal(true)}
-              onGalleryClick={() => setShowGallery(true)}
             />
           </motion.div>
         )}
 
         {currentStage === "name" && (
-          <motion.div key="name" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <NameInputStage onSubmit={(name) => {
-              setUserName(name);
-              transitionToStage("reflection");
-            }} />
+          <motion.div key="name" {...stageVariants}>
+            <NameInputStage
+              onSubmit={(name) => {
+                setUserName(name);
+                playSound("sparkle");
+                transitionToStage("reflection");
+              }}
+            />
           </motion.div>
         )}
 
         {currentStage === "reflection" && (
-          <motion.div key="reflection" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <ReflectionStage onComplete={(data) => {
-              setReflections(data);
-              setGiftKey(k => k + 1);
-              transitionToStage("gift");
-            }} />
+          <motion.div key="reflection" {...stageVariants}>
+            <ReflectionStage
+              onComplete={(data) => {
+                setReflections(data);
+                transitionToStage("gift");
+              }}
+            />
           </motion.div>
         )}
 
         {currentStage === "gift" && (
-          <motion.div key="gift" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <GiftStage key={giftKey} onOpen={() => {
-              setShowBurst(true);
-              setShowConfetti(true);
-              setShowFireworks(true);
-              transitionToStage("reveal");
-            }} onTap={() => {}} />
+          <motion.div key="gift" {...stageVariants}>
+            <GiftStage
+              onTap={() => playSound("sparkle")}
+              onOpen={() => {
+                setShowConfetti(true);
+                setShowFireworks(true);
+                playStinger("reveal");
+                transitionToStage("reveal");
+              }}
+            />
           </motion.div>
         )}
 
         {currentStage === "reveal" && (
-          <motion.div key="reveal" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <RevealStage userName={userName} reflections={reflections} onContinue={() => transitionToStage("celebration")} />
+          <motion.div key="reveal" {...stageVariants}>
+            <RevealStage
+              userName={userName}
+              reflections={reflections}
+              onContinue={() => transitionToStage("celebration")}
+            />
           </motion.div>
         )}
 
         {currentStage === "celebration" && (
-          <motion.div key="celebration" variants={stageVariants} initial="initial" animate="animate" exit="exit">
+          <motion.div key="celebration" {...stageVariants}>
             <CelebrationStage
               userName={userName}
               reflections={reflections}
               onReplay={() => transitionToStage("welcome")}
               onDeveloperClick={() => setShowDeveloperModal(true)}
-              onGoHome={() => transitionToStage("welcome")}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      <DeveloperModal open={showDeveloperModal} onOpenChange={setShowDeveloperModal} />
+      {/* 🔥 EFFECTS (ONLY WHEN NEEDED) */}
+      <Suspense fallback={null}>
+        {showConfetti && (
+          <ConfettiExplosion
+            active={showConfetti}
+            count={isLiteMode ? 30 : 60}
+          />
+        )}
+
+        {effectsReady && !isLiteMode && showFireworks && (
+          <FireworksEffect active />
+        )}
+      </Suspense>
+
+      {/* 🔥 MODALS */}
+      <DeveloperModal
+        open={showDeveloperModal}
+        onOpenChange={setShowDeveloperModal}
+      />
     </div>
   );
-};
-
-export default Index;
+}
