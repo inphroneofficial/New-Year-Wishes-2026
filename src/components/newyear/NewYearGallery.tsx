@@ -287,79 +287,118 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
                 </motion.button>
               ))}
             </div>
-          
-
-       {/* 📱 MOBILE — Grid (Full image, vertical scroll) */}
-<div className="md:hidden">
-  <motion.div layout className="grid grid-cols-2 gap-3">
-    <AnimatePresence>
-      {filteredItems.map((item, index) => (
-        <motion.div
-          key={item.id}
-          layout
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ delay: index * 0.02 }}
-          className="relative rounded-xl overflow-hidden cursor-pointer bg-background"
-          onClick={() => setSelectedItem(item)}
-        >
-          {/* FULL IMAGE — NO CUT */}
-          <img
-            src={item.thumbnail}
-            alt={item.title}
-            className="w-full h-auto object-contain"
-            loading="lazy"
-          />
-
-          {/* Title */}
-          <div className="p-2">
-            <p className="text-xs font-medium text-foreground truncate">
-              {item.title}
-            </p>
           </div>
 
-          {/* Actions */}
-          <div className="absolute top-2 right-2 flex gap-1">
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 bg-background/70 backdrop-blur"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleLike(item.id);
-              }}
-            >
-              <Heart
-                className={`w-3.5 h-3.5 ${
-                  likedItems.has(item.id)
-                    ? 'fill-red-500 text-red-500'
-                    : ''
-                }`}
-              />
-            </Button>
+          {/* Gallery - Horizontal scroll on mobile, Grid on larger screens */}
+<div className="flex-1 overflow-y-auto p-4 md:p-6">
 
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 bg-background/70 backdrop-blur"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDownload(item);
-              }}
-            >
-              <Download className="w-3.5 h-3.5" />
-            </Button>
-          </div>
+  {/* 📱 MOBILE — Horizontal Scroll */}
+  <div className="md:hidden">
+    <motion.div
+      layout
+      className="
+        flex gap-4 overflow-x-auto
+        pb-4 -mx-4 px-4
+        snap-x snap-mandatory
+        scrollbar-hide
+      "
+    >
+      <AnimatePresence>
+        {filteredItems.map((item, index) => (
+          <motion.div
+            key={item.id}
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ delay: index * 0.03 }}
+            className="
+              relative snap-center
+              min-w-[65%] max-w-[65%]
+              rounded-2xl overflow-hidden
+              cursor-pointer aspect-[3/4]
+            "
+            onClick={() => setSelectedItem(item)}
+          >
+            {/* Image */}
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
 
-          {/* Border */}
-          <div className="absolute inset-0 rounded-xl border border-border/20 pointer-events-none" />
-        </motion.div>
-      ))}
-    </AnimatePresence>
-  </motion.div>
-</div>
+            {/* Video Icon */}
+            {item.type === "video" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-background/80 backdrop-blur flex items-center justify-center">
+                  <Play className="w-5 h-5 text-foreground ml-0.5" />
+                </div>
+              </div>
+            )}
 
+            {/* Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
+
+            {/* Title */}
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <p className="text-sm font-medium text-foreground truncate">
+                {item.title}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="absolute top-2 right-2 flex gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 bg-background/70 backdrop-blur"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleLike(item.id);
+                }}
+              >
+                <Heart
+                  className={`w-4 h-4 ${
+                    likedItems.has(item.id)
+                      ? "fill-red-500 text-red-500"
+                      : ""
+                  }`}
+                />
+              </Button>
+
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 bg-background/70 backdrop-blur"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownload(item);
+                }}
+              >
+                <Download className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Liked Indicator */}
+            {likedItems.has(item.id) && (
+              <div className="absolute top-2 left-2">
+                <Heart className="w-4 h-4 fill-red-500 text-red-500 drop-shadow-lg" />
+              </div>
+            )}
+
+            {/* Border */}
+            <div className="absolute inset-0 rounded-2xl border border-border/20 pointer-events-none" />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </motion.div>
+  </div>
+
+  {/* 🖥 DESKTOP — Grid (UNCHANGED) */}
+  <div className="hidden md:grid grid-cols-3 lg:grid-cols-4 gap-4">
+    {/* your existing desktop grid here */}
+  </div>
 
 
             {/* Desktop Grid */}
