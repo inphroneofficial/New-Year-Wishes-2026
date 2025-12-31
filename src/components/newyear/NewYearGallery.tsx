@@ -287,74 +287,94 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
                 </motion.button>
               ))}
             </div>
-          </div>
+          
 
-          {/* 📱 Mobile Grid — show all wallpapers, full image */}
+        {/* 📱 MOBILE — Grid (Full image, no cut, no scroll) */}
 <div className="md:hidden">
   <motion.div
     layout
-    className="grid grid-cols-3 gap-2"
+    className="grid grid-cols-2 gap-3"
   >
     <AnimatePresence>
       {filteredItems.map((item, index) => (
         <motion.div
           key={item.id}
           layout
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
+          exit={{ opacity: 0, scale: 0.95 }}
           transition={{ delay: index * 0.02 }}
           className="
-            relative rounded-xl overflow-hidden
-            bg-muted/40 backdrop-blur
-            aspect-[9/16] cursor-pointer
+            relative
+            rounded-xl overflow-hidden
+            cursor-pointer
+            bg-background
           "
           onClick={() => setSelectedItem(item)}
         >
-          {/* Image (FULLY VISIBLE) */}
+          {/* Image - FULL DISPLAY */}
           <img
             src={item.thumbnail}
             alt={item.title}
-            className="w-full h-full object-contain p-1"
+            className="w-full h-auto object-contain"
             loading="lazy"
           />
 
-          {/* Video Indicator */}
+          {/* Video Icon */}
           {item.type === "video" && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-8 h-8 rounded-full bg-background/80 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-background/80 backdrop-blur flex items-center justify-center">
                 <Play className="w-4 h-4 text-foreground ml-0.5" />
               </div>
             </div>
           )}
 
-          {/* Like Icon */}
-          {likedItems.has(item.id) && (
-            <div className="absolute top-1 left-1">
-              <Heart className="w-3 h-3 fill-red-500 text-red-500" />
-            </div>
-          )}
+          {/* Title */}
+          <div className="p-2">
+            <p className="text-xs font-medium text-foreground truncate">
+              {item.title}
+            </p>
+          </div>
 
           {/* Actions */}
-          <div className="absolute top-1 right-1 flex gap-1">
+          <div className="absolute top-2 right-2 flex gap-1">
             <Button
               size="icon"
               variant="ghost"
-              className="h-6 w-6 bg-background/70"
+              className="h-7 w-7 bg-background/70 backdrop-blur"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleLike(item.id);
               }}
             >
               <Heart
-                className={`w-3 h-3 ${
+                className={`w-3.5 h-3.5 ${
                   likedItems.has(item.id)
                     ? "fill-red-500 text-red-500"
                     : ""
                 }`}
               />
             </Button>
+
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 bg-background/70 backdrop-blur"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownload(item);
+              }}
+            >
+              <Download className="w-3.5 h-3.5" />
+            </Button>
           </div>
+
+          {/* Liked Indicator */}
+          {likedItems.has(item.id) && (
+            <div className="absolute top-2 left-2">
+              <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500 drop-shadow" />
+            </div>
+          )}
 
           {/* Border */}
           <div className="absolute inset-0 rounded-xl border border-border/20 pointer-events-none" />
@@ -365,10 +385,6 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
 </div>
 
 
-  {/* 🖥 DESKTOP — Grid (UNCHANGED) */}
-  <div className="hidden md:grid grid-cols-3 lg:grid-cols-4 gap-4">
-    {/* your existing desktop grid here */}
-  </div>
 
             {/* Desktop Grid */}
             <motion.div

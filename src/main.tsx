@@ -9,3 +9,9 @@ if (!rootElement) {
 }
 
 createRoot(rootElement).render(<App />);
+
+/* 🔥 REMOVE HTML BOOT LOADER AFTER REACT IS READY */
+const bootLoader = document.getElementById("boot-loader");
+if (bootLoader) {
+  bootLoader.remove();
+}

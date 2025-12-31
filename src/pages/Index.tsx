@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import WelcomeStage from "@/components/newyear/WelcomeStage";
@@ -22,7 +22,7 @@ import PremiumBackground from "@/components/newyear/PremiumBackground";
 import CinematicTransition from "@/components/newyear/CinematicTransition";
 import AmbientLighting from "@/components/newyear/AmbientLighting";
 import PerformanceToggle from "@/components/newyear/PerformanceToggle";
-import { ThemeVariant } from "@/components/newyear/ThemeSelector";
+import ThemeSelector, { ThemeVariant } from "@/components/newyear/ThemeSelector";
 import NewYearGallery from "@/components/newyear/NewYearGallery";
 import MobileControlsMenu from "@/components/newyear/MobileControlsMenu";
 import RewindItSection from "@/components/newyear/RewindItSection";
@@ -41,6 +41,7 @@ type Stage =
   | "reveal"
   | "celebration";
 
+/* 🔥 Lightweight animation (NO blur) */
 const stageVariants = {
   initial: { opacity: 0, y: 30 },
   animate: {
@@ -64,7 +65,6 @@ const Index = () => {
   const [showFireworks, setShowFireworks] = useState(false);
   const [showBurst, setShowBurst] = useState(false);
 
-  // ✅ Music ON by default
   const [isMuted, setIsMuted] = useState(false);
   const [isLiteMode, setIsLiteMode] = useState(false);
 
@@ -76,32 +76,22 @@ const Index = () => {
   const [currentTheme, setCurrentTheme] = useState<ThemeVariant>("midnight");
   const [showCinematicTransition, setShowCinematicTransition] = useState(false);
 
+  /* 🔥 NEW: delay heavy effects */
+  const [effectsReady, setEffectsReady] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setEffectsReady(true));
+  }, []);
+
   const { playSound } = useSoundEffects(isMuted);
   const { triggerHaptic } = useHapticFeedback();
   const { start: startAmbientMusic } = useAmbientMusic(isMuted);
   const { playStinger } = useMusicStingers(isMuted);
 
   const effectsEnabled = useMemo(
-    () => !isLiteMode && !showCinematicTransition,
-    [isLiteMode, showCinematicTransition]
+    () => effectsReady && !isLiteMode && !showCinematicTransition,
+    [effectsReady, isLiteMode, showCinematicTransition]
   );
-
-  // 🔑 Start music on first user interaction (mobile-safe)
-  useEffect(() => {
-    const unlockAudio = () => {
-      startAmbientMusic();
-      window.removeEventListener("touchstart", unlockAudio);
-      window.removeEventListener("click", unlockAudio);
-    };
-
-    window.addEventListener("touchstart", unlockAudio, { once: true });
-    window.addEventListener("click", unlockAudio, { once: true });
-
-    return () => {
-      window.removeEventListener("touchstart", unlockAudio);
-      window.removeEventListener("click", unlockAudio);
-    };
-  }, [startAmbientMusic]);
 
   const transitionToStage = useCallback(
     (stage: Stage) => {
@@ -118,62 +108,13 @@ const Index = () => {
     [isLiteMode, playStinger]
   );
 
-  /* ---------------- HANDLERS ---------------- */
-
-  const handleStartJourney = useCallback(() => {
-    startAmbientMusic();
-    playSound("click");
-    triggerHaptic("medium");
-    transitionToStage("name");
-  }, [startAmbientMusic, playSound, triggerHaptic, transitionToStage]);
-
-  const handleNameSubmit = useCallback(
-    (name: string) => {
-      setUserName(name);
-      playSound("sparkle");
-      triggerHaptic("success");
-      transitionToStage("reflection");
-    },
-    [playSound, triggerHaptic, transitionToStage]
-  );
-
-  const handleReflectionComplete = useCallback(
-    (data: ReflectionData) => {
-      setReflections(data);
-      setGiftKey((k) => k + 1);
-      transitionToStage("gift");
-    },
-    [transitionToStage]
-  );
-
-  const handleOpenGift = useCallback(() => {
-    setShowBurst(true);
-    playSound("reveal");
-    triggerHaptic("heavy");
-
-    setTimeout(() => {
-      setShowConfetti(true);
-      setShowFireworks(true);
-      transitionToStage("reveal");
-    }, 800);
-  }, [playSound, triggerHaptic, transitionToStage]);
-
-  const handleReplay = useCallback(() => {
-    setShowConfetti(false);
-    setShowFireworks(false);
-    setShowBurst(false);
-    setReflections(null);
-    setUserName("Friend");
-    transitionToStage("welcome");
-  }, [transitionToStage]);
-
   if (currentStage === "loading") {
     return <LoadingScreen onComplete={() => transitionToStage("welcome")} />;
   }
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {!isLiteMode && <PremiumBackground variant="aurora" intensity="low" />}
+      {effectsEnabled && <PremiumBackground variant="aurora" intensity="low" />}
       {effectsEnabled && <AmbientLighting stage={currentStage as any} />}
       {effectsEnabled && <GlowingOrbs count={6} />}
       {effectsEnabled && <ShootingStars active frequency={5000} />}
@@ -192,10 +133,7 @@ const Index = () => {
       />
 
       <motion.div className="hidden md:flex fixed top-4 right-4 z-50 gap-2">
-        <PerformanceToggle
-          isLiteMode={isLiteMode}
-          onToggle={() => setIsLiteMode((m) => !m)}
-        />
+        <PerformanceToggle isLiteMode={isLiteMode} onToggle={() => setIsLiteMode((m) => !m)} />
         <ThemeToggle />
         <SoundToggle isMuted={isMuted} onToggle={() => setIsMuted((m) => !m)} />
       </motion.div>
@@ -211,7 +149,7 @@ const Index = () => {
         {currentStage === "welcome" && (
           <motion.div key="welcome" variants={stageVariants} initial="initial" animate="animate" exit="exit">
             <WelcomeStage
-              onStart={handleStartJourney}
+              onStart={() => transitionToStage("name")}
               onDeveloperClick={() => setShowDeveloperModal(true)}
               onGalleryClick={() => setShowGallery(true)}
             />
@@ -220,29 +158,37 @@ const Index = () => {
 
         {currentStage === "name" && (
           <motion.div key="name" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <NameInputStage onSubmit={handleNameSubmit} />
+            <NameInputStage onSubmit={(name) => {
+              setUserName(name);
+              transitionToStage("reflection");
+            }} />
           </motion.div>
         )}
 
         {currentStage === "reflection" && (
           <motion.div key="reflection" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <ReflectionStage onComplete={handleReflectionComplete} />
+            <ReflectionStage onComplete={(data) => {
+              setReflections(data);
+              setGiftKey(k => k + 1);
+              transitionToStage("gift");
+            }} />
           </motion.div>
         )}
 
         {currentStage === "gift" && (
           <motion.div key="gift" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <GiftStage key={giftKey} onOpen={handleOpenGift} onTap={() => {}} />
+            <GiftStage key={giftKey} onOpen={() => {
+              setShowBurst(true);
+              setShowConfetti(true);
+              setShowFireworks(true);
+              transitionToStage("reveal");
+            }} onTap={() => {}} />
           </motion.div>
         )}
 
         {currentStage === "reveal" && (
           <motion.div key="reveal" variants={stageVariants} initial="initial" animate="animate" exit="exit">
-            <RevealStage
-              userName={userName}
-              reflections={reflections}
-              onContinue={() => transitionToStage("celebration")}
-            />
+            <RevealStage userName={userName} reflections={reflections} onContinue={() => transitionToStage("celebration")} />
           </motion.div>
         )}
 
@@ -251,7 +197,7 @@ const Index = () => {
             <CelebrationStage
               userName={userName}
               reflections={reflections}
-              onReplay={handleReplay}
+              onReplay={() => transitionToStage("welcome")}
               onDeveloperClick={() => setShowDeveloperModal(true)}
               onGoHome={() => transitionToStage("welcome")}
             />
