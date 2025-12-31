@@ -623,48 +623,65 @@ const CelebrationStage = forwardRef<HTMLDivElement, CelebrationStageProps>(({ us
                 </span>
               </motion.button>
 
-               {/* Replay Button */}
-<motion.button
-  onClick={onReplay}
-  className="relative group w-full flex flex-col items-center justify-center gap-2 p-6 rounded-2xl overflow-hidden focus:outline-none"
-  style={{
-    background:
-      'linear-gradient(135deg, hsl(var(--luxury-aurora-1)), hsl(var(--luxury-aurora-2)))',
-    border: '1px solid hsl(var(--luxury-aurora-1) / 0.5)',
-    boxShadow: '0 10px 40px hsl(var(--luxury-aurora-1) / 0.35)',
-  }}
-  whileHover={{
-    scale: 1.04,
-    boxShadow: '0 25px 60px hsl(var(--luxury-aurora-1) / 0.45)',
-  }}
-  whileTap={{ scale: 0.97 }}
->
-  {/* Shine overlay (visual only – safe) */}
-  <motion.div
-    className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none"
-    style={{
-      background:
-        'linear-gradient(120deg, transparent, hsl(0 0% 100% / 0.25), transparent)',
-    }}
-    transition={{ duration: 0.4 }}
-  />
+               {/* Replay */}
+              <motion.button
+                onClick={onReplay}
+                className="relative group flex flex-col items-center justify-center gap-3 p-5 rounded-2xl overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(var(--luxury-aurora-1)), hsl(var(--luxury-aurora-2)))',
+                  border: '1px solid hsl(var(--luxury-aurora-1) / 0.5)',
+                  boxShadow: '0 8px 32px hsl(var(--luxury-aurora-1) / 0.3)',
+                }}
+                whileHover={{ scale: 1.02, boxShadow: '0 20px 50px hsl(var(--luxury-aurora-1) / 0.4)' }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                  style={{ background: 'linear-gradient(135deg, hsl(0 0% 100% / 0.15), transparent)' }}
+                  transition={{ duration: 0.3 }}
+                />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                >
+                  <RefreshCw className="w-7 h-7 text-white drop-shadow-lg" />
+            </motion.div>
 
-  {/* Rotating icon */}
-  <motion.div
-    animate={{ rotate: 360 }}
-    transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-    className="relative z-10"
-  >
-    <RefreshCw className="w-8 h-8 text-white drop-shadow-lg" />
-  </motion.div>
-
-  <span className="relative z-10 text-sm font-semibold text-white tracking-wide drop-shadow-md">
-    Replay Magic ✨
-  </span>
-</motion.button>
-
-
-</div>
+            {/* Home Button - Full Width */}
+            <motion.button
+              onClick={onGoHome}
+              className="relative group w-full flex items-center justify-center gap-3 p-5 rounded-2xl overflow-hidden mt-3"
+              style={{
+                background: 'linear-gradient(135deg, hsl(var(--card) / 0.9), hsl(var(--muted) / 0.7))',
+                border: '1px solid hsl(var(--border) / 0.5)',
+                boxShadow: '0 8px 32px hsl(0 0% 0% / 0.2)',
+              }}
+              whileHover={{ 
+                scale: 1.02, 
+                boxShadow: '0 20px 50px hsl(var(--luxury-aurora-1) / 0.25)',
+                background: 'linear-gradient(135deg, hsl(var(--luxury-aurora-1) / 0.3), hsl(var(--luxury-aurora-2) / 0.2))',
+              }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <motion.div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                style={{ background: 'linear-gradient(135deg, hsl(var(--luxury-aurora-1) / 0.1), transparent)' }}
+                transition={{ duration: 0.3 }}
+              />
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Home className="w-6 h-6 text-foreground group-hover:text-luxury-aurora1 transition-colors" />
+              </motion.div>
+              <span className="text-sm font-semibold text-foreground tracking-wide">Back to Home</span>
+            </motion.button>
+                <span className="text-sm font-semibold text-white drop-shadow-md tracking-wide">Replay Magic</span>
+              </motion.button>
+            </div>
 
             {/* Secondary Actions */}
             <div className="grid grid-cols-2 gap-3">
