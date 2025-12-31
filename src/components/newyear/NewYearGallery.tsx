@@ -289,12 +289,9 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
             </div>
           
 
-        {/* 📱 MOBILE — Grid (Full image, no cut, no scroll) */}
+       {/* 📱 MOBILE — Grid (Full image, vertical scroll) */}
 <div className="md:hidden">
-  <motion.div
-    layout
-    className="grid grid-cols-2 gap-3"
-  >
+  <motion.div layout className="grid grid-cols-2 gap-3">
     <AnimatePresence>
       {filteredItems.map((item, index) => (
         <motion.div
@@ -304,30 +301,16 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ delay: index * 0.02 }}
-          className="
-            relative
-            rounded-xl overflow-hidden
-            cursor-pointer
-            bg-background
-          "
+          className="relative rounded-xl overflow-hidden cursor-pointer bg-background"
           onClick={() => setSelectedItem(item)}
         >
-          {/* Image - FULL DISPLAY */}
+          {/* FULL IMAGE — NO CUT */}
           <img
             src={item.thumbnail}
             alt={item.title}
             className="w-full h-auto object-contain"
             loading="lazy"
           />
-
-          {/* Video Icon */}
-          {item.type === "video" && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-background/80 backdrop-blur flex items-center justify-center">
-                <Play className="w-4 h-4 text-foreground ml-0.5" />
-              </div>
-            </div>
-          )}
 
           {/* Title */}
           <div className="p-2">
@@ -350,8 +333,8 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
               <Heart
                 className={`w-3.5 h-3.5 ${
                   likedItems.has(item.id)
-                    ? "fill-red-500 text-red-500"
-                    : ""
+                    ? 'fill-red-500 text-red-500'
+                    : ''
                 }`}
               />
             </Button>
@@ -368,13 +351,6 @@ const NewYearGallery = memo(forwardRef<HTMLDivElement, NewYearGalleryProps>(({ o
               <Download className="w-3.5 h-3.5" />
             </Button>
           </div>
-
-          {/* Liked Indicator */}
-          {likedItems.has(item.id) && (
-            <div className="absolute top-2 left-2">
-              <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500 drop-shadow" />
-            </div>
-          )}
 
           {/* Border */}
           <div className="absolute inset-0 rounded-xl border border-border/20 pointer-events-none" />

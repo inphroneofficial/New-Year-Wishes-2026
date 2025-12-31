@@ -49,8 +49,19 @@ export default function DeveloperModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] max-w-md md:max-w-lg p-0 overflow-hidden shadow-2xl">
-
+      <DialogContent
+        className="
+          w-[92vw]
+          max-w-md
+          md:max-w-lg
+          h-[90vh]
+          p-0
+          overflow-hidden
+          flex
+          flex-col
+          shadow-2xl
+        "
+      >
         {/* Ambient Background */}
         <div className="absolute inset-0 pointer-events-none">
           <motion.div
@@ -64,8 +75,8 @@ export default function DeveloperModal({
           />
         </div>
 
-        <div className="relative max-h-[80vh] overflow-y-auto p-6">
-
+        {/* 🔥 SCROLLABLE CONTENT */}
+        <div className="relative flex-1 overflow-y-auto p-6">
           {/* Header */}
           <DialogHeader className="text-center pb-4">
             <motion.div
@@ -122,11 +133,10 @@ export default function DeveloperModal({
             </h3>
 
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-              A thoughtful design and gentle technology
-              can turn moments into meaningful memories.
+              A thoughtful design and gentle technology can turn moments into
+              meaningful memories.
             </p>
 
-            {/* Links */}
             <div className="flex gap-2 pt-2">
               {developerLinks.map((link, i) => (
                 <motion.a
@@ -176,8 +186,8 @@ export default function DeveloperModal({
           </motion.div>
         </div>
 
-        {/* Footer */}
-        <DialogFooter className="p-4 border-t bg-card/50">
+        {/* 🔥 STICKY FOOTER (ALWAYS VISIBLE) */}
+        <DialogFooter className="shrink-0 p-4 border-t bg-card/80 backdrop-blur-md">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
@@ -185,7 +195,6 @@ export default function DeveloperModal({
             <a href="mailto:imgtk17@gmail.com">Send a Note</a>
           </Button>
         </DialogFooter>
-
       </DialogContent>
     </Dialog>
   );
